@@ -53,3 +53,37 @@ func RangeToPortsList(portsRange string) (*[]uint, error) {
 
 	return &ports, nil
 }
+
+func IsValidCIDR(cidr string) bool {
+	_, _, err := net.ParseCIDR(cidr)
+	return err == nil
+}
+
+func CIDRToIPList(cidr string) ([]string, error) {
+	ip, ipnet, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return nil, err
+	}
+
+	var ips []string
+	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); incrementIP(ip) {
+		ips = append(ips, ip.String())
+	}
+
+	// Remove network address and broadcast address
+	if len(ips) > 2 {
+		return ips[1 : len(ips)-1], nil
+	}
+
+	return ips, nil
+}
+
+// incrementIP increments the given IP address.
+func incrementIP(ip net.IP) {
+	for j := len(ip) - 1; j >= 0; j-- {
+		ip[j]++
+		if ip[j] > 0 {
+			break
+		}
+	}
+}

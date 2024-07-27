@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/netip"
 	"regexp"
@@ -75,6 +76,16 @@ func main() {
 
 	for _, host := range strings.Split(targetsFlag, ",") {
 		if _, err := netip.ParseAddr(host); err != nil {
+			if helper.IsValidCIDR(host) {
+				ips, err := helper.CIDRToIPList(host)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+
+				targets = append(targets, ips...)
+				continue
+			}
+
 			ips, err := helper.DomainToIP(host)
 			if err != nil {
 				log.Fatal(err.Error())
@@ -92,6 +103,8 @@ func main() {
 
 	targets = slices.Compact(targets)
 	ports = slices.Compact(ports)
+
+	fmt.Println(targets)
 
 	s := scanner.NewScanner(threadsFlag, ports...)
 	s.Scan(targets...)
