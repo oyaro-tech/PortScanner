@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/netip"
 	"regexp"
@@ -103,8 +102,6 @@ func main() {
 
 	targets = slices.Compact(targets)
 	ports = slices.Compact(ports)
-
-	fmt.Println(targets)
 
 	s := scanner.NewScanner(threadsFlag, ports...)
 	s.Scan(targets...)
