@@ -17,6 +17,7 @@ var (
 	targetsFlag string
 	portsFlag   string
 	threadsFlag uint
+	timeoutFlag uint
 )
 
 // TODO: Proxy flag - for usage tor or other services as proxy
@@ -28,6 +29,7 @@ func main() {
 	flag.StringVar(&targetsFlag, "target", "127.0.0.1", "comma splitted list of targets [IPv4, IPv6, CIDR, Domain]")
 	flag.StringVar(&portsFlag, "port", "80,443", "comma splitted list of ports [supports ranges 22-1023]")
 	flag.UintVar(&threadsFlag, "thread", 100, "number of threads")
+	flag.UintVar(&timeoutFlag, "timeout", 1, "timeout for port probe in seconds")
 
 	flag.Parse()
 
@@ -37,6 +39,8 @@ func main() {
 		log.Fatalf("[!] Ports list cannot be empty")
 	} else if threadsFlag <= 0 {
 		log.Fatalf("[!] Threads cannot be less then 1")
+	} else if timeoutFlag <= 0 {
+		log.Fatalf("[!] Timeout cannot be less then 1 second")
 	}
 
 	var targets []string
@@ -103,6 +107,6 @@ func main() {
 	targets = slices.Compact(targets)
 	ports = slices.Compact(ports)
 
-	s := scanner.NewScanner(threadsFlag, ports...)
+	s := scanner.NewScanner(threadsFlag, timeoutFlag, ports...)
 	s.Scan(targets...)
 }

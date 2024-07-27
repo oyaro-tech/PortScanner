@@ -11,6 +11,7 @@ import (
 type Scanner struct {
 	Ports   []uint
 	Threads uint
+	Timeout uint
 }
 
 type Status struct {
@@ -19,11 +20,12 @@ type Status struct {
 	port   uint
 }
 
-func NewScanner(threads uint, ports ...uint) *Scanner {
+func NewScanner(threads uint, timeout uint, ports ...uint) *Scanner {
 	var scanner Scanner
 
 	scanner.Ports = ports
 	scanner.Threads = threads
+	scanner.Timeout = timeout
 
 	return &scanner
 }
@@ -66,7 +68,7 @@ func (s *Scanner) Scan(targets ...string) {
 func (s *Scanner) checkPort(target string, port uint, c chan Status) {
 	_port := strconv.Itoa(int(port))
 
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(target, _port), time.Second)
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(target, _port), (time.Duration(s.Timeout) * time.Second))
 	if err != nil {
 		c <- Status{status: false, host: target, port: port}
 		return
